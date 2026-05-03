@@ -31,6 +31,15 @@
 
   <script src="./node_modules/tim-upload-plugin/index.js"></script>
   <script src="./node_modules/tim-js-sdk/tim-js-friendship.js"></script>
+  <script>
+    window.addEventListener('error', function (e) {
+      var err = e && e.error ? e.error : null;
+      console.error('GlobalError', e && e.message ? e.message : e, err && err.stack ? err.stack : '');
+    });
+    window.addEventListener('unhandledrejection', function (e) {
+      console.error('UnhandledRejection', e && e.reason ? e.reason : e);
+    });
+  </script>
 
   <title>momotalk</title>
   <link rel="manifest" href="manifest.json">

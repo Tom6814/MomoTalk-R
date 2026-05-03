@@ -2,10 +2,11 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback,SystemNavigator;
 import 'package:url_launcher/url_launcher_string.dart' show launchUrlString;
-import 'package:window_manager/window_manager.dart';
+import 'platform/window_manager_bridge.dart';
 import 'package:eventflux/eventflux.dart';
 import 'package:app_links/app_links.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -32,7 +33,7 @@ import 'im/im_page.dart';
 
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isWindows) {
+  if (!kIsWeb && Platform.isWindows) {
     await windowManager.ensureInitialized();
     WindowOptions windowOptions = const WindowOptions(
       titleBarStyle: TitleBarStyle.hidden,
@@ -157,7 +158,7 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
   @override
   void didChangeMetrics() {
     super.didChangeMetrics();
-    if(!Platform.isAndroid){
+    if(kIsWeb || !Platform.isAndroid){
       return;
     }
     final bottom = WidgetsBinding.instance.platformDispatcher.views.first.viewInsets.bottom;
@@ -397,7 +398,7 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
     bool buildLock = false;
     TextEditingController controller = TextEditingController();
     showDialog(context: context, 
-      barrierDismissible: !Platform.isAndroid,
+      barrierDismissible: kIsWeb || !Platform.isAndroid,
       builder: (context){
       return StatefulBuilder(builder: (context, setState) {
         return AlertDialog(
@@ -834,11 +835,11 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
     }else if (value == 'Draw') {
       sdWorkflow();
     }else if (value == 'Exit') {
-      if (Platform.isWindows) {
+      if (!kIsWeb && Platform.isWindows) {
         windowManager.close();
       }
     }else if (value == 'OnTop') {
-      if (Platform.isWindows) {
+      if (!kIsWeb && Platform.isWindows) {
         setState(() {
           isOnTop = !isOnTop;
         });
@@ -1028,7 +1029,7 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
     return PopScope(
       canPop: false,
       onPopInvoked: (bool didPop) async {
-        if(!Platform.isAndroid) return;
+        if(kIsWeb || !Platform.isAndroid) return;
         if (didPop) return;
         if(currentBackPressTime==null||DateTime.now().difference(currentBackPressTime!) > const Duration(seconds: 2)){
           currentBackPressTime = DateTime.now();
