@@ -5,7 +5,9 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   permission_handler_windows
+  record_windows
   screen_retriever_windows
+  tencent_cloud_chat_sdk
   url_launcher_windows
   window_manager
 )

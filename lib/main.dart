@@ -27,6 +27,7 @@ import 'aidraw.dart';
 import 'recordmsgs.dart';
 import 'leftpanel.dart';
 import 'avatars.dart';
+import 'im/im_page.dart';
 
 
 main() async {
@@ -54,7 +55,7 @@ class MomotalkApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'MomoTalk',
-      home: const MainPage(),
+      home: const ImPage(),
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
