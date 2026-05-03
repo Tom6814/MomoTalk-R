@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:momotalk/im/chat_repository.dart';
 import 'package:momotalk/im/chat_repository_factory.dart';
@@ -50,8 +51,12 @@ class _ImPageState extends State<ImPage> {
     );
     if (r == null) return;
     try {
-      final sig = await _usersigApi.getUserSig(userId: r.userId);
-      await _controller.login(userId: sig.userId, userSig: sig.userSig);
+      if (kIsWeb) {
+        await _controller.login(userId: r.userId, userSig: '');
+      } else {
+        final sig = await _usersigApi.getUserSig(userId: r.userId);
+        await _controller.login(userId: sig.userId, userSig: sig.userSig);
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
