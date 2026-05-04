@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const TLSSigAPIv2 = require('tls-sig-api-v2');
+const path = require('node:path');
 
 const app = express();
 app.use(cors());
@@ -15,6 +16,57 @@ if (!SDK_APP_ID || !SDK_SECRET_KEY) {
 }
 
 const api = new TLSSigAPIv2.Api(SDK_APP_ID, SDK_SECRET_KEY);
+
+const { createStore } = require('./auth_store');
+const store = createStore({ filePath: path.join(__dirname, 'users.json') });
+
+function toJsonError(err) {
+  if (err && typeof err === 'object') {
+    if (typeof err.code === 'string') return { code: err.code, message: err.message || '' };
+    if (typeof err.message === 'string') return { message: err.message };
+  }
+  return { message: 'unknown error' };
+}
+
+app.post('/v1/auth/register', async (req, res) => {
+  try {
+    const username = String(req.body?.username || '').trim();
+    const password = String(req.body?.password || '');
+    const userId = await store.register({ username, password });
+    res.json({ userId });
+  } catch (err) {
+    const code = err?.code;
+    if (code === 'USERNAME_EXISTS') {
+      res.status(409).json({ error: toJsonError(err) });
+      return;
+    }
+    if (code === 'INVALID_USERNAME' || code === 'INVALID_PASSWORD') {
+      res.status(400).json({ error: toJsonError(err) });
+      return;
+    }
+    res.status(500).json({ error: toJsonError(err) });
+  }
+});
+
+app.post('/v1/auth/login', async (req, res) => {
+  try {
+    const username = String(req.body?.username || '').trim();
+    const password = String(req.body?.password || '');
+    const userId = await store.login({ username, password });
+    res.json({ userId });
+  } catch (err) {
+    const code = err?.code;
+    if (code === 'INVALID_CREDENTIALS') {
+      res.status(401).json({ error: toJsonError(err) });
+      return;
+    }
+    if (code === 'INVALID_USERNAME' || code === 'INVALID_PASSWORD') {
+      res.status(400).json({ error: toJsonError(err) });
+      return;
+    }
+    res.status(500).json({ error: toJsonError(err) });
+  }
+});
 
 app.post('/v1/im/usersig', (req, res) => {
   const userId = String(req.body?.userId || '').trim();
@@ -31,4 +83,3 @@ const port = Number(process.env.PORT || '8080');
 app.listen(port, () => {
   process.stdout.write(`usersig service listening on ${port}\n`);
 });
-

@@ -1,0 +1,20 @@
+[
+  {
+    "username": "alice_01",
+    "userId": "alice_01",
+    "salt": "1f76d13a64a4bac09d6d14bcae713bb7",
+    "hash": "619955a4ea1c614bb80627c035f4ad2230fcb001def51cb6a921dda276035177",
+    "iterations": 120000,
+    "digest": "sha256",
+    "createdAt": "2026-05-04T13:54:03.516Z"
+  },
+  {
+    "username": "demo_01",
+    "userId": "demo_01",
+    "salt": "b4ccd2aedc69e5b36d5e451b1c54f23e",
+    "hash": "35ed9b0f85f1e010ed19d37546b2c0ec9d20e5afaa1ee53bb0278a77cfac0b62",
+    "iterations": 120000,
+    "digest": "sha256",
+    "createdAt": "2026-05-04T14:00:16.048Z"
+  }
+]

@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:momotalk/im/auth_api.dart';
+import 'package:momotalk/im/auth_page.dart';
 import 'package:momotalk/im/chat_repository.dart';
 import 'package:momotalk/im/chat_repository_factory.dart';
 import 'package:momotalk/im/im_controller.dart';
-import 'package:momotalk/im/login_dialog.dart';
 import 'package:momotalk/im/models.dart';
 import 'package:momotalk/im/usersig_api.dart';
 
@@ -21,6 +22,7 @@ class _ImPageState extends State<ImPage> {
 
   late final ChatRepository _repo;
   late final ImController _controller;
+  late final AuthApi _authApi;
   late final UsersigApi _usersigApi;
 
   final _inputCtrl = TextEditingController();
@@ -30,7 +32,9 @@ class _ImPageState extends State<ImPage> {
     super.initState();
     _repo = createChatRepository();
     _controller = ImController(repo: _repo);
-    _usersigApi = UsersigApi(dio: Dio(), baseUrl: _defaultUsersigBaseUrl);
+    final dio = Dio();
+    _authApi = AuthApi(dio: dio, baseUrl: _defaultUsersigBaseUrl);
+    _usersigApi = UsersigApi(dio: dio, baseUrl: _defaultUsersigBaseUrl);
     _bootstrap();
   }
 
@@ -44,17 +48,15 @@ class _ImPageState extends State<ImPage> {
 
   Future<void> _ensureLoggedIn() async {
     if (_controller.authState.value.isLoggedIn) return;
-    final r = await showDialog<LoginResult>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const LoginDialog(),
+    final userId = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => AuthPage(api: _authApi)),
     );
-    if (r == null) return;
+    if (userId == null) return;
     try {
       if (kIsWeb) {
-        await _controller.login(userId: r.userId, userSig: '');
+        await _controller.login(userId: userId, userSig: '');
       } else {
-        final sig = await _usersigApi.getUserSig(userId: r.userId);
+        final sig = await _usersigApi.getUserSig(userId: userId);
         await _controller.login(userId: sig.userId, userSig: sig.userSig);
       }
     } catch (e) {
